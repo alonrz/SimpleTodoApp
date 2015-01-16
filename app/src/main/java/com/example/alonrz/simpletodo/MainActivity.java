@@ -74,8 +74,10 @@ public class MainActivity extends ActionBarActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if(resultCode == RESULT_OK)
         {
-            Intent i = getIntent();
-            items.set(i.getIntExtra("position",0), i.getStringExtra("text"));
+            String itemText = data.getStringExtra("text");
+            int position = data.getIntExtra("position", 0);
+
+            items.set(position, itemText);
             writeItems();
             itemsAdapter.notifyDataSetChanged();
         }
