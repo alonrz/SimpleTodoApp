@@ -11,18 +11,15 @@ import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
 
-import org.apache.commons.io.FileUtils;
-
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 
 
 public class MainActivity extends ActionBarActivity {
 
-    ArrayList<String> items;
-    ArrayAdapter<String> itemsAdapter;
+    ArrayList<TodoItem> items;
+    ArrayAdapter<TodoItem> itemsAdapter;
     ListView lvItems;
+    TodoItemDatabase db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,9 +27,9 @@ public class MainActivity extends ActionBarActivity {
         setContentView(R.layout.activity_main);
 
         lvItems = (ListView)findViewById(R.id.lvItems);
-
+        db = new TodoItemDatabase(this);
         readItems();
-        itemsAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, items);
+        itemsAdapter = new ArrayAdapter<TodoItem>(this, android.R.layout.simple_list_item_1, items);
         lvItems.setAdapter(itemsAdapter);
 
         setupListViewListener();
@@ -41,9 +38,12 @@ public class MainActivity extends ActionBarActivity {
     public void onAddItem(View v)
     {
         EditText etNewItem = (EditText)findViewById(R.id.etNewItem);
-        String newItem = etNewItem.getText().toString();
-        itemsAdapter.add(newItem);
-        writeItems();
+        TodoItem item = new TodoItem(etNewItem.getText().toString(), false, 1);
+        int id = writeNewItem(item);
+        item.setId(id);
+
+        itemsAdapter.add(item);
+
         etNewItem.setText("");
     }
 
@@ -52,8 +52,11 @@ public class MainActivity extends ActionBarActivity {
         lvItems.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                items.remove(position);
-                writeItems();
+                TodoItem item = items.remove(position);
+                if(item !=null)
+                    db.deleteTodoItem(item);
+                else
+                    return false;
                 itemsAdapter.notifyDataSetChanged();
                 return true;
             }
@@ -63,7 +66,7 @@ public class MainActivity extends ActionBarActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Intent i = new Intent(MainActivity.this, EditItemActivity.class);
-                i.putExtra("text", items.get(position));
+                i.putExtra("text", items.get(position).toString());
                 i.putExtra("position", position);
                 startActivityForResult(i, 0);
             }
@@ -77,8 +80,10 @@ public class MainActivity extends ActionBarActivity {
             String itemText = data.getStringExtra("text");
             int position = data.getIntExtra("position", 0);
 
-            items.set(position, itemText);
-            writeItems();
+            TodoItem item = items.get(position);
+            item.setText(itemText);
+
+            writeUpdateItem(item);
             itemsAdapter.notifyDataSetChanged();
         }
     }
@@ -107,26 +112,39 @@ public class MainActivity extends ActionBarActivity {
 
     private void readItems()
     {
-        File filesDir = getFilesDir();
-        File todoFile = new File(filesDir, "todo.txt");
-        try {
-            items = new ArrayList<>(FileUtils.readLines(todoFile));
-        } catch (IOException e) {
-            items = new ArrayList<>();
-        }
+//        File filesDir = getFilesDir();
+//        File todoFile = new File(filesDir, "todo.txt");
+//        try {
+//            items = new ArrayList<>(FileUtils.readLines(todoFile));
+
+        items =  new ArrayList<>( db.getAllTodoItems());
+
+//        } catch (IOException e) {
+//            items = new ArrayList<>();
+//        }
     }
 
-    private void writeItems()
+    private int writeNewItem(TodoItem item)
     {
-        File filesDir = getFilesDir();
-        File todoFile = new File(filesDir, "todo.txt");
-        try {
-            FileUtils.writeLines(todoFile, items);
-        }
-        catch(IOException e) {
-            e.printStackTrace();
-        }
-
+        return (int)db.addTodoItem(item);
     }
+
+    private void writeUpdateItem(TodoItem item)
+    {
+        db.updateTodoItem(item);
+    }
+//    private void writeItems()
+//    {
+//        File filesDir = getFilesDir();
+//        File todoFile = new File(filesDir, "todo.txt");
+//        try {
+//            FileUtils.writeLines(todoFile, items);
+//        }
+//        catch(IOException e) {
+//            e.printStackTrace();
+//        }
+
+
+//    }
 
 }
