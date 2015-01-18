@@ -7,7 +7,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
 
@@ -17,7 +16,7 @@ import java.util.ArrayList;
 public class MainActivity extends ActionBarActivity {
 
     ArrayList<TodoItem> items;
-    ArrayAdapter<TodoItem> itemsAdapter;
+    TodoItemsAdapter itemsAdapter;
     ListView lvItems;
     TodoItemDatabase db;
 
@@ -29,7 +28,8 @@ public class MainActivity extends ActionBarActivity {
         lvItems = (ListView)findViewById(R.id.lvItems);
         db = new TodoItemDatabase(this);
         readItems();
-        itemsAdapter = new ArrayAdapter<TodoItem>(this, android.R.layout.simple_list_item_1, items);
+        itemsAdapter = new TodoItemsAdapter(this, items);
+
         lvItems.setAdapter(itemsAdapter);
 
         setupListViewListener();
