@@ -2,6 +2,7 @@ package com.example.alonrz.simpletodo;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -9,16 +10,19 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.Spinner;
 
 import java.util.ArrayList;
 
 
-public class MainActivity extends ActionBarActivity {
+public class MainActivity extends ActionBarActivity implements MyAlertDialogFragment.DeleteAlertDialogListener {
 
     ArrayList<TodoItem> items;
     TodoItemsAdapter itemsAdapter;
     ListView lvItems;
     TodoItemDatabase db;
+    TodoItem mSelectedItem;
+    int mSelectedPosition = -1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,7 +42,9 @@ public class MainActivity extends ActionBarActivity {
     public void onAddItem(View v)
     {
         EditText etNewItem = (EditText)findViewById(R.id.etNewItem);
-        TodoItem item = new TodoItem(etNewItem.getText().toString(), false, 1);
+        Spinner mySpinner = (Spinner)findViewById(R.id.spinnerPriority);
+        String priorityText = mySpinner.getSelectedItem().toString();
+        TodoItem item = new TodoItem(etNewItem.getText().toString(), false, Integer.parseInt(priorityText));
         int id = writeNewItem(item);
         item.setId(id);
 
@@ -47,17 +53,35 @@ public class MainActivity extends ActionBarActivity {
         etNewItem.setText("");
     }
 
+    private void onEditItem(int position) {
+//        Intent i = new Intent(this, EditItemActivity.class);
+//        i.putExtra("text", items.get(position).toString());
+//        i.putExtra("position", position);
+//        startActivityForResult(i, 0);
+        TodoItem item = items.get(position);
+        FragmentManager fm = getSupportFragmentManager();
+        EditItemDialog frag = EditItemDialog.newInstance(item);
+        frag.show(fm, "fragment_edit_item");
+
+
+    }
+
     private void setupListViewListener()
     {
         lvItems.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                TodoItem item = items.remove(position);
-                if(item !=null)
-                    db.deleteTodoItem(item);
+                mSelectedPosition = position;
+                TodoItem item = items.get(mSelectedPosition);
+                if(item !=null) {
+                    mSelectedItem = item;
+                    MyAlertDialogFragment frag = MyAlertDialogFragment.newInstance(item.getText());
+                    frag.show(getSupportFragmentManager(), "delete_warning");
+
+                }
                 else
                     return false;
-                itemsAdapter.notifyDataSetChanged();
+
                 return true;
             }
         });
@@ -65,13 +89,12 @@ public class MainActivity extends ActionBarActivity {
         lvItems.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Intent i = new Intent(MainActivity.this, EditItemActivity.class);
-                i.putExtra("text", items.get(position).toString());
-                i.putExtra("position", position);
-                startActivityForResult(i, 0);
+                onEditItem(position);
             }
         });
     }
+
+
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -133,6 +156,18 @@ public class MainActivity extends ActionBarActivity {
     {
         db.updateTodoItem(item);
     }
+
+    @Override
+    public void onFinishAlertDialog(boolean isConfirmed) {
+        if(isConfirmed)
+        {
+            db.deleteTodoItem(mSelectedItem);
+            items.remove(mSelectedPosition);
+            itemsAdapter.notifyDataSetChanged();
+        }
+    }
+
+
 //    private void writeItems()
 //    {
 //        File filesDir = getFilesDir();

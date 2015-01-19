@@ -23,7 +23,7 @@ public class TodoItemsAdapter extends ArrayAdapter<TodoItem> {
         TodoItem item = getItem(position);
         if(convertView == null)
         {
-            convertView = LayoutInflater.from(getContext()).inflate(R.layout.item_todo, parent, false);
+            convertView = LayoutInflater.from(getContext()).inflate(R.layout.list_item_todo, parent, false);
         }
         TextView txtText = (TextView)convertView.findViewById(R.id.txtTodoText);
         TextView txtPriority = (TextView)convertView.findViewById(R.id.txtPriority);
