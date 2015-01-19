@@ -1,6 +1,18 @@
 # Simple Todo App
-A simple TODO app to get a handle on basic concepts in Android development.
-This app contains a list of items, with priority attached. 
-When adding an item, user can choose a priority from 1 to 3. (In future developments these can be color coded too)
-User can click on an item to edit or long press to delete. 
+This ia a simple TODO app for Android to help get a handle on basic concepts in Android development.
+
+Time spent: 4 days with ~ 3 hours each day. 
+
+Areas which consumed time: Sorting the UI with the differnt layouts, understanding fragments, understanding the SQLite Helper class and usage. 
+
+User stories:
+- User can add todo items with a priority attached to them. Supporting multiline as well.
+- User can delete an item by long pressing it and confirming deletion. 
+- User can edit an item by clicking it and making the changed in a dialog fragment. 
+
+Final appilcation supports SQLite for data and priorities for items. The DB is set up for due dates and completed marks as well but is not supported yet. 
+
+Tried using fragments in several ways (interfaces and builder, etc...) to experiment the different ways to do so. 
+
+
 
