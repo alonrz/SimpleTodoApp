@@ -14,7 +14,7 @@ Final appilcation supports SQLite for data and priorities for items. The DB is s
 
 Tried using fragments in several ways (interfaces and builder, etc...) to experiment the different ways to do so. 
 
-![Video Walkthrough](SimpleTodoAppWalkthrough.gif)
+![Video Walkthrough](SimpleTodoAppWalkthough.gif)
 
 GIF created with [LiceCap](http://www.cockos.com/licecap/).
 
