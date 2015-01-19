@@ -1,6 +1,5 @@
 package com.example.alonrz.simpletodo;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.ActionBarActivity;
@@ -15,7 +14,7 @@ import android.widget.Spinner;
 import java.util.ArrayList;
 
 
-public class MainActivity extends ActionBarActivity implements MyAlertDialogFragment.DeleteAlertDialogListener {
+public class MainActivity extends ActionBarActivity implements MyAlertDialogFragment.DeleteAlertDialogListener, EditItemDialog.EditItemDialogListener {
 
     ArrayList<TodoItem> items;
     TodoItemsAdapter itemsAdapter;
@@ -54,16 +53,9 @@ public class MainActivity extends ActionBarActivity implements MyAlertDialogFrag
     }
 
     private void onEditItem(int position) {
-//        Intent i = new Intent(this, EditItemActivity.class);
-//        i.putExtra("text", items.get(position).toString());
-//        i.putExtra("position", position);
-//        startActivityForResult(i, 0);
-        TodoItem item = items.get(position);
         FragmentManager fm = getSupportFragmentManager();
-        EditItemDialog frag = EditItemDialog.newInstance(item);
+        EditItemDialog frag = EditItemDialog.newInstance(mSelectedItem);
         frag.show(fm, "fragment_edit_item");
-
-
     }
 
     private void setupListViewListener()
@@ -77,7 +69,6 @@ public class MainActivity extends ActionBarActivity implements MyAlertDialogFrag
                     mSelectedItem = item;
                     MyAlertDialogFragment frag = MyAlertDialogFragment.newInstance(item.getText());
                     frag.show(getSupportFragmentManager(), "delete_warning");
-
                 }
                 else
                     return false;
@@ -89,26 +80,14 @@ public class MainActivity extends ActionBarActivity implements MyAlertDialogFrag
         lvItems.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                onEditItem(position);
+                mSelectedPosition = position;
+                TodoItem item = items.get(mSelectedPosition);
+                if(item !=null) {
+                    mSelectedItem = item;
+                    onEditItem(mSelectedPosition);
+                }
             }
         });
-    }
-
-
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if(resultCode == RESULT_OK)
-        {
-            String itemText = data.getStringExtra("text");
-            int position = data.getIntExtra("position", 0);
-
-            TodoItem item = items.get(position);
-            item.setText(itemText);
-
-            writeUpdateItem(item);
-            itemsAdapter.notifyDataSetChanged();
-        }
     }
 
     @Override
@@ -135,16 +114,8 @@ public class MainActivity extends ActionBarActivity implements MyAlertDialogFrag
 
     private void readItems()
     {
-//        File filesDir = getFilesDir();
-//        File todoFile = new File(filesDir, "todo.txt");
-//        try {
-//            items = new ArrayList<>(FileUtils.readLines(todoFile));
 
         items =  new ArrayList<>( db.getAllTodoItems());
-
-//        } catch (IOException e) {
-//            items = new ArrayList<>();
-//        }
     }
 
     private int writeNewItem(TodoItem item)
@@ -167,19 +138,17 @@ public class MainActivity extends ActionBarActivity implements MyAlertDialogFrag
         }
     }
 
-
-//    private void writeItems()
-//    {
-//        File filesDir = getFilesDir();
-//        File todoFile = new File(filesDir, "todo.txt");
-//        try {
-//            FileUtils.writeLines(todoFile, items);
-//        }
-//        catch(IOException e) {
-//            e.printStackTrace();
-//        }
+    @Override
+    public void onFinishEditListener(String newText) {
+        if(newText == null)
+            return; //Cancel was pressed.
+        mSelectedItem.setText(newText);
 
 
-//    }
+        mSelectedItem.setText(newText);
 
+        writeUpdateItem(mSelectedItem);
+        itemsAdapter.notifyDataSetChanged();
+
+    }
 }

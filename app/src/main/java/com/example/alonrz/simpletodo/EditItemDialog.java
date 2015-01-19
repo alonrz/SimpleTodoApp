@@ -7,27 +7,29 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.EditText;
 
 /**
  * Created by alonrz on 1/18/15.
  */
-public class EditItemDialog extends DialogFragment {
+public class EditItemDialog extends DialogFragment implements View.OnClickListener {
+
+    public interface EditItemDialogListener
+    {
+        void onFinishEditListener(String newText);
+    }
 
     private static EditItemDialog dialogFrag = null;
     private EditText txtEditTextView;
     //empty ctor - must for fragments
     public EditItemDialog() {}
 
-    //Singleton to get instance
+
     public static EditItemDialog newInstance(TodoItem item)
     {
+        dialogFrag = new EditItemDialog();
 
-        if(dialogFrag == null )
-        {
-            dialogFrag = new EditItemDialog();
-
-        }
         Bundle args = new Bundle();
         args.putString("text", item.getText());
         args.putInt("priority", item.getPriority());
@@ -40,9 +42,13 @@ public class EditItemDialog extends DialogFragment {
         View view = inflater.inflate(R.layout.fragment_edit_item, container);
 
         txtEditTextView = (EditText) view.findViewById(R.id.txtEditItemFragment);
-        String text =  getArguments().getString("text");
+        String text = getArguments().getString("text");
         txtEditTextView.setText(text);
         txtEditTextView.requestFocus();
+        Button btnOK = (Button)view.findViewById(R.id.btnOK);
+        Button btnCancel = (Button)view.findViewById(R.id.btnCancel);
+        btnOK.setOnClickListener(this);
+        btnCancel.setOnClickListener(this);
 
         getDialog().getWindow().setSoftInputMode(
                 WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
@@ -51,14 +57,21 @@ public class EditItemDialog extends DialogFragment {
         return view;
     }
 
-    public void onClickConfirm(View v)
-    {
-        dialogFrag.dismiss();
-    }
 
-    public void onClickCancel(View v)
-    {
-        dialogFrag.dismiss();
-    }
 
+    @Override
+    public void onClick(View v) {
+        EditItemDialogListener listener = (EditItemDialogListener)getActivity();
+
+        if(((Button)v).getText().toString().equalsIgnoreCase("Confirm"))
+        {
+
+            listener.onFinishEditListener(txtEditTextView.getText().toString());
+        }
+        else {
+            listener.onFinishEditListener(null);
+
+        }
+        getDialog().dismiss();
+    }
 }

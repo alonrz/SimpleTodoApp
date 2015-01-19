@@ -23,15 +23,24 @@
 
         android:hint="Add a New Item"/>
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="Priority"
+        android:id="@+id/textView3"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentBottom="true"/>
+
     <Spinner
         android:layout_width="60dp"
         android:layout_height="wrap_content"
         android:id="@+id/spinnerPriority"
-        
         android:entries="@array/priorities"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
+        android:layout_alignBottom="@+id/textView3"
+        android:layout_toRightOf="@+id/textView3"
+        android:layout_toEndOf="@+id/textView3" />
 
     <Button
         android:layout_width="wrap_content"
